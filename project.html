@@ -1,0 +1,62 @@
+<!doctype html>
+<html>
+<head>
+  <!-- Formato de codificación UTF-8 para ciertos simbolos -->
+  <meta charset="UTF-8">
+  <link href="lib/bootstrap-3.3.7-dist/css/bootstrap.min.css" rel="stylesheet">
+  <title>Grafos Aleatorios Dinámicos</title>
+
+  <style type="text/css">
+
+    body {
+      font: 12pt sans;
+      background: rgba(51, 183, 112, 0.74);
+    }
+    #mynetwork {
+       background: white;
+      float:left;
+      width: 900px;
+      height: 600px;
+      margin:5px;
+      margin-left: 35px !important;
+      border: 2px solid lightgray;
+    }
+  </style>
+
+
+  <script type="text/javascript" src="exampleUtil.js"></script>
+  <script type="text/javascript" src="dist/vis.js"></script>
+  <script type="text/javascript" src="script.js"></script>
+  <link href="dist/vis-network.min.css" rel="stylesheet" type="text/css" />
+
+  <script type="text/javascript">
+    
+  </script>
+  
+</head>
+
+<body onload="draw(10);">
+  <h1 class="text-center">Grafos Aleatorios Dinamicos</h1>
+  <div class='row'>
+    <div class='col-xs-9' id="mynetwork"></div>
+    <div class='col-xs-3'>
+    <div class="panel panel-primary">
+            <div class="panel-heading">
+              <h3 class="panel-title">Parametros</h3>
+            </div>
+            <div class="panel-body">
+              Número de Nodos: 
+      <input type="range" min="2" max="100" step="2" value="10" name="height" id="nodeCount"> 
+      <span id="val">10</span>
+      <br>
+      <button class="btn  btn-primary" onClick="draw(document.getElementById('nodeCount').value);">Generar</button>
+            </div>
+          </div>
+      
+    </div>
+</div>
+</body>
+<script src="lib/jquery-3.2.1.min.js"></script>
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    <script src="lib/bootstrap-3.3.7-dist/js/bootstrap.min.js"></script>
+</html>
