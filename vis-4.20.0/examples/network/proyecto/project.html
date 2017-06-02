@@ -1,0 +1,114 @@
+<!doctype html>
+<html>
+<head>
+  <!-- Formato de codificación UTF-8 para ciertos simbolos -->
+  <meta charset="UTF-8">
+  <title>Grafos Aleatorios Dinámicos</title>
+
+  <style type="text/css">
+    body {
+      font: 12pt sans;
+    }
+    #mynetwork {
+      float:left;
+      width: 600px;
+      height: 600px;
+      margin:5px;
+      border: 2px solid lightgray;
+    }
+  </style>
+
+
+  <script type="text/javascript" src="../exampleUtil.js"></script>
+  <script type="text/javascript" src="../../../dist/vis.js"></script>
+  <link href="../../../dist/vis-network.min.css" rel="stylesheet" type="text/css" />
+
+  <script type="text/javascript">
+    var nodes = null;
+    var edges = null;
+    var graph = null;
+
+    function draw(nodeCount) {
+
+      document.getElementById('nodeCount').addEventListener('change',updateRange,false);
+
+      nodes = [];
+      edges = [];
+
+      // generador
+      var data = generateGraph(nodeCount);
+
+      // create a network
+      var container = document.getElementById('mynetwork');
+
+      var options = {
+        "edges": {
+          "smooth": {
+            "type": "curvedCCW",
+            "forceDirection": "none"
+          }
+        },
+        "physics": {
+          "barnesHut": {
+            "springLength": 500
+          },
+          "minVelocity": 0.75
+        }
+      };
+      graph = new vis.Network(container, data, options);
+    }
+
+    function generateGraph(nodeCount) {
+      var nodes = [];
+      var edges = [];
+      
+      // randomly create some nodes
+      for (var i = 0; i < nodeCount; i++) {
+        nodes.push({
+          id: i,
+          label: String(i)
+        });
+      }
+
+      // randomly create some edges
+      for (var i = 0; i < nodeCount; i++) {
+        for (var j = 0; j < nodeCount; j++) {
+          if (i != j) {
+            if (getZeroOne() == 1) {
+              edges.push({
+                from: i,
+                to: j
+              });
+            }
+          }
+        }
+      }
+
+      return {nodes:nodes, edges:edges};
+    }
+
+    function getZeroOne() {
+      return Math.floor(Math.random() * 2);
+    }
+
+    function updateRange() {
+      document.getElementById('val').innerHTML=document.getElementById('nodeCount').value;
+    }
+  </script>
+  
+</head>
+
+<body onload="draw(10);">
+
+<h2>Grafos Aleatorios Dinámicos</h2>
+<br />
+<div>
+  Número de Nodos: 
+  <input type="range" min="2" max="100" step="2" value="10" name="height" id="nodeCount">
+  <span id="val">10</span>
+  <br>
+  <button onClick="draw(document.getElementById('nodeCount').value);">Generar</button>
+</div>
+<div id="mynetwork"></div>
+</body>
+</html>
