@@ -12,6 +12,10 @@
       font: 12pt sans;
       background: rgba(51, 183, 112, 0.74);
     }
+    .panel{
+          width: 387px;
+
+    }
     #network {
        background: white;
       float:left;
@@ -19,8 +23,38 @@
       height: 600px;
       margin:5px;
       margin-left: 35px !important;
-      border: 2px solid lightgray;
-    }
+      border: 2px solid lightgray;}
+     #contenedor{
+        margin: 10px auto;
+        padding-left: 15px !important;
+        width: 540px;
+        height: 115px;
+      }
+      .reloj{
+        float: left;
+        font-size: 43px;
+        font-family: Courier,sans-serif;
+        color: #363431;
+      }
+      .boton{
+        outline: none;
+        border: 1px solid #363431;
+        color: white;
+        width: 103px;
+        height: 30px;
+        text-shadow: 0px -1px 1px black;
+        font-size: 20px;
+        border-radius: 5px;
+        font-family: Helvetica;
+        cursor: pointer;
+        background-image: linear-gradient(#3aad02,#2c6f05);
+      }
+      .boton:active{
+        background-image: linear-gradient(#2c6f05,#3aad02);
+      }
+      .boton:hover{
+        box-shadow: 0px 0px 14px #3aad02;
+      }
   </style>
 
 
@@ -41,15 +75,24 @@
               <h3 class="panel-title">Parametros</h3>
             </div>
             <div class="panel-body">
-            <input type="button" class="btn  btn-success"  id="import_button" onclick="importNetwork()" value="Agregar Nodo"></input>
-            <input type="button" class="btn  btn-danger" id="destroy_button" onclick="destroyNetwork()" value="Borrar"></input>
-
-              Número de Nodos: 
-            <input type="range" class="vis-configuration vis-config-range" min="2" max="100" step="2" value="10" name="height" id="nodeCount"> </input>
-           <span id="val"></span>
-            <br>
-            <button class="btn  btn-primary" onClick="draw(document.getElementById('nodeCount').value);">Generar 
-            </button> 
+                <div id="contenedor row text-center" style="margin-left: 31px";>
+                  <div class="reloj" id="Horas">00</div>
+                  <div class="reloj" id="Minutos">:00</div>
+                  <div class="reloj" id="Segundos">:00</div>
+                  <div class="reloj" id="Centesimas">:00</div>
+                  <div class='row'>
+                  <input type="button" class="boton" id="inicio" value="Start &#9658;" onclick="inicio();">
+                  <input type="button" class="boton" id="parar" value="Stop &#8718;" onclick="parar();" disabled> 
+                  <input type="button" class="boton" id="reinicio" value="Reset &#8635;" onclick="reinicio();" disabled>
+                  </div>
+              </div>
+                <br>
+               
+                 <p> Escoja el numero de nodos por segundo </p>
+                <input type="range" class="vis-configuration vis-config-range" min="1" max="100" step="2" value=1 name="height" onClick="numberNodes(document.getElementById('nodeCount').value);" id="nodeCount"> 
+                <span id="val">1</span> </input>
+                <br>
+                 
             </div>
          </div>
       </div>

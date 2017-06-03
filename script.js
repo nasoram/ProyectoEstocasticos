@@ -3,6 +3,7 @@
             var exportArea;
             var importButton;
             var exportButton;
+            document.getElementById('nodeCount').addEventListener('change',updateRange,false);
 var options = {
                   "nodes": {
                   "fixed": {
@@ -34,6 +35,19 @@ var options = {
               "connections": [ ]
             }
           ];
+        
+        function generate() {
+              for (var n = 0; n < document.getElementById('nodeCount').value; n++) {
+                addNodo();
+                  }
+                   var data = {
+                    nodes: getNodeData(grafo),
+                    edges: getEdgeData(grafo)
+                }
+                network = new vis.Network(container, data, options);
+
+                resizeExportArea();
+            }
 
             function addNodo() {
                 var size=grafo.length;
@@ -62,9 +76,11 @@ var options = {
               function getZeroOne() {
                 return Math.floor(Math.random() * 2);
               }
+              function updateRange() {
+              document.getElementById('val').innerHTML=document.getElementById('nodeCount').value;
+              }
             function init() {
                 container = document.getElementById('network');
-                exportArea = document.getElementById('input_output');
                 importButton = document.getElementById('import_button');
                 exportButton = document.getElementById('export_button');
 
@@ -76,22 +92,15 @@ var options = {
                 elem.connections = network.getConnectedNodes(index);
             }
 
-            function destroyNetwork() {
-                network.destroy();
-                grafo.splice(0,grafo.length);
-            }
-
-          
-
              function draw() {
-      var inputData = grafo;
-      var data = {
-          nodes: getNodeData(inputData),
-          edges: getEdgeData(inputData)
-      }
-      network = new vis.Network(container, data, options);
+              var inputData = grafo;
+              var data = {
+                  nodes: getNodeData(inputData),
+                  edges: getEdgeData(inputData)
+              }
+              network = new vis.Network(container, data, options);
 
-  }
+          }
             function exportNetwork() {
 
                 var nodes = objectToArray(network.getPositions());
@@ -106,17 +115,7 @@ var options = {
                 resizeExportArea();
             }
 
-            function importNetwork() {
-               addNodo();
-                var data = {
-                    nodes: getNodeData(grafo),
-                    edges: getEdgeData(grafo)
-                }
-
-                network = new vis.Network(container, data, options);
-
-                resizeExportArea();
-            }
+           
 
             function getNodeData(data) {
                 var networkNodes = [];
@@ -174,5 +173,71 @@ var options = {
             function resizeExportArea() {
                 exportArea.style.height = (1 + exportArea.scrollHeight) + "px";
             }
+            //------------------------RELOJ--------------
+            var centesimas = 0;
+            var segundos = 0;
+            var minutos = 0;
+            var horas = 0;
+            function inicio () {
+              control = setInterval(cronometro,10);
+              document.getElementById("inicio").disabled = true;
+              document.getElementById("parar").disabled = false;
+              document.getElementById("reinicio").disabled = false;
+            }
+            function parar () {
+              clearInterval(control);
+              document.getElementById("parar").disabled = true;
+              document.getElementById("inicio").disabled = false;
+            }
+            function reinicio () {
+              clearInterval(control);
+              centesimas = 0;
+              segundos = 0;
+              minutos = 0;
+              horas = 0;
+              Centesimas.innerHTML = ":00";
+              Segundos.innerHTML = ":00";
+              Minutos.innerHTML = ":00";
+              Horas.innerHTML = "00";
+              document.getElementById("inicio").disabled = false;
+              document.getElementById("parar").disabled = true;
+              document.getElementById("reinicio").disabled = true;
+              network.destroy();
+              grafo.splice(0,grafo.length);
+            }
+            function cronometro () {
+              if (centesimas < 99) {
+                centesimas++;
+                if (centesimas < 10) { centesimas = "0"+centesimas }
+                Centesimas.innerHTML = ":"+centesimas;
+              }
+              if (centesimas == 99) {
+                centesimas = -1;
+              }
+              if (centesimas == 0) {
+                segundos ++;
+                if(segundos%3==0 ){
+                  generate();
+                }
+                if (segundos < 10) { segundos = "0"+segundos }
+                Segundos.innerHTML = ":"+segundos;
+              }
+              if (segundos == 59) {
+                segundos = -1;
+              }
+              if ( (centesimas == 0)&&(segundos == 0) ) {
+                minutos++;
 
+                if (minutos < 10) { minutos = "0"+minutos }
+                Minutos.innerHTML = ":"+minutos;
+              }
+              if (minutos == 59) {
+                minutos = -1;
+              }
+              if ( (centesimas == 0)&&(segundos == 0)&&(minutos == 0) ) {
+                horas ++;
+                if (horas < 10) { horas = "0"+horas }
+                Horas.innerHTML = horas;
+              }
+            }
             init();
