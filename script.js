@@ -161,7 +161,7 @@ function getEdgeData(data) {
 
 
       if (duplicateIndex != -1) {
-      elementConnections.splice(duplicateIndex, 1);
+        elementConnections.splice(duplicateIndex, 1);
       };
     });
   });
@@ -212,14 +212,14 @@ function reset () {
   document.getElementById("stop").disabled = true;
   document.getElementById("reset").disabled = true;
   network.destroy();
-  graph.splice(0,graph.length);
+  graph.splice(0, graph.length);
 }
 
 function timer () {
   if (centiseconds < 99) {
     centiseconds++;
     if (centiseconds < 10) { centiseconds = "0" + centiseconds }
-    Centiseconds.innerHTML = ":"+centiseconds;
+    Centiseconds.innerHTML = ":" + centiseconds;
   }
   if (centiseconds == 99) {
     centiseconds = -1;
@@ -230,7 +230,7 @@ function timer () {
       generate();
     }
     if (seconds < 10) { seconds = "0" + seconds }
-    Seconds.innerHTML = ":"+seconds;
+    Seconds.innerHTML = ":" + seconds;
   }
   if (seconds == 59) {
     seconds = -1;
