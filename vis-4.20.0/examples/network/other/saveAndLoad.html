@@ -40,11 +40,6 @@
     </head>
 
     <body>
-        <p>
-            In this example, the network data can be exported to JSON and imported back into the network.
-
-            Try this out by exporting the network to JSON, clearing the network and then importing it again. The nodes will all appear in the same position as they were before the network was destroyed.
-        </p>
 
         <div id="network"></div>
 
@@ -61,7 +56,65 @@
             var exportArea;
             var importButton;
             var exportButton;
+var options = {
+                  "nodes": {
+                  "fixed": {
+                    "x": true,
+                    "y": true
+                  },
+                  "physics": false
+                  },
+                  "edges": {
+                  "physics": false,
+                  "smooth": {
+                    "forceDirection": "none"
+                  }
+                  },
+                  "interaction": {
+                  "dragNodes": false,
+                  "dragView": false
+                  },
+                  "physics": {
+                  "enabled": false,
+                  "minVelocity": 0.75
+                  }
+                  };   
+     var grafo = [
+            {
+              "x": 0,
+              "y": 0,
+              "id": "0",
+              "connections": [ ]
+            }
+          ];
 
+            function addNodo() {
+                var size=grafo.length;
+                 grafo.push(  { "x": randomCoord(),
+                                  "y": randomCoord(),
+                                  "id": size ,
+                                  "connections": dynamcalEdges(size),
+                                }
+                                );
+                    }
+
+              function randomCoord(){
+                  var num = Math.floor(Math.random()*2000); // this will get a number between 1 and 99;
+                  num *= Math.floor(Math.random()*2) == 1 ? 1 : -1; // this will add minus sign in 50% of cases
+                  return num;
+              }
+              function dynamcalEdges(size){
+                  var connections = [];
+                      for (var j = 0; j < size; j++) {
+                          if (getZeroOne() == 1) {
+                            connections.push(j);
+                          }
+                        }
+                    return connections;                
+              }
+              function getZeroOne() {
+                return Math.floor(Math.random() * 2);
+              }
             function init() {
                 container = document.getElementById('network');
                 exportArea = document.getElementById('input_output');
@@ -78,23 +131,21 @@
 
             function destroyNetwork() {
                 network.destroy();
+                grafo.splice(0,grafo.length);
             }
 
-            function clearOutputArea() {
-                exportArea.value = "";
-            }
+          
 
-            function draw() {
-                // create a network of nodes
-                var data = getScaleFreeNetwork(5);
+             function draw() {
+      var inputData = grafo;
+      var data = {
+          nodes: getNodeData(inputData),
+          edges: getEdgeData(inputData)
+      }
+      network = new vis.Network(container, data, options);
 
-                network = new vis.Network(container, data, {manipulation:{enabled:true}});
-
-                clearOutputArea();
-            }
-
+  }
             function exportNetwork() {
-                clearOutputArea();
 
                 var nodes = objectToArray(network.getPositions());
 
@@ -109,15 +160,13 @@
             }
 
             function importNetwork() {
-                var inputValue = exportArea.value;
-                var inputData = JSON.parse(inputValue);
-
+               addNodo();
                 var data = {
-                    nodes: getNodeData(inputData),
-                    edges: getEdgeData(inputData)
+                    nodes: getNodeData(grafo),
+                    edges: getEdgeData(grafo)
                 }
 
-                network = new vis.Network(container, data, {});
+                network = new vis.Network(container, data, options);
 
                 resizeExportArea();
             }

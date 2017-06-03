@@ -1,4 +1,5 @@
- var network;
+
+            var network;
             var container;
             var exportArea;
             var importButton;
