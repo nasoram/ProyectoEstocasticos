@@ -37,7 +37,7 @@
               <br>
               <div style="width: 100%">
                   <div class="form-group" >
-                    <div id="arbolBalanceado" class="params">                 
+                    <div id="arbol" class="params">                 
                        <div >
                             <label>Número de hijos<input class="form-control" id="nodeCount" value="2" type="input" required></label>
                         </div>
@@ -49,6 +49,7 @@
                       </div>
                         <label>m0<input class="form-control" id="m0" type="input" required=""></label>
                         <label>M<input id="M" class="form-control" type="input"requied></label>
+                        <br><span>M debe ser menor o igual a m0</span>
                         </div>
                     <div id="erdosRenyiP" class="params">
                       <div >
@@ -61,12 +62,14 @@
                          <label>Número de Nodos<input class="form-control" id="nodeCount" value="2" type="input" required></label>
                       </div>
                         <label>Número de Vértices<input class="form-control" id="ERE" type="input" required></label>
+                        <br><span>Debe ser menor al número de nodos</span>
                     </div>
                     <div id="wattsStrogatzA" class="params">
                       <div >
                           <label>Número de Nodos<input class="form-control" id="nodeCount" value="2" type="input" required></label>
                         </div>
-                        <label>K<input id="wattsStrogatzAlphaK" class="form-control" type="input" required=""></label>
+                        <label>K<input id="wattsStrogatzAlphaK" class="form-control"  type="input"></label>
+                        <span> N > K > 1 </span>
                         <label>alpha<input class="form-control" id="wattsStrogatzAlpha" type="input" required></label>
                     </div>
                     <div id="wattsStrogatzB" class="params">
@@ -74,11 +77,11 @@
                             <label>Número de Nodos<input class="form-control" id="nodeCount" value="2" type="input" required>
                             </label>
                          </div>
-                        <label>K<input class="form-control" id="wattsStrogatzBetaK" type="input" required=""></label>
-                        <label>beta<input class="form-control" id="wattsStrogatzBeta" type="input" required=""></label>                    
+                        <label>K<input class="form-control" id="wattsStrogatzBetaK" type="input" ></label>
+                        <span> N > K > 1 </span>
+                        <label>beta<input class="form-control" title="Debe ser número par." id="wattsStrogatzBeta" value="2"  type="number" name="quantity" step="2" ></label>                    
                     </div>
                   </div>
-                  <button style="font-size: 12px;font-weight: bold; padding: 4px 10px;" onClick="generate();">Generar</button>
               </div>
           </div>
           <div id="controles">
@@ -87,7 +90,7 @@
               <select id="iteration" class="form-control" >
                   <option value="user" data-toggle="tooltip" title="El usuario indica cada cuantos segundos se generaran nuevos nodos.">
                   Elegido por el Usuario</option>
-                  <option value="random" data-toggle="tooltip" title="El numero de segundos en el que se generan nuevos nodos variara aleatoriamente entre cada iteración.">
+                  <option value="random" data-toggle="tooltip" title="El número de segundos en el que se generan nuevos nodos variara aleatoriamente entre cada iteración.">
                   Aleatoria</option>
               </select>
               <br>
@@ -99,7 +102,7 @@
                     </div>
                     <div id="random" class="params2">
                            <label>Se generaran nuevos nodos cada</label>
-                      <span class="form-control" id="random-seconds" value="-" type="input" readonly><span>   segundos</span>
+                      <span class="form-control" id="random-seconds" value="-" type="input" readonly></span><span>   segundos</span>
                     </div>                  
                   </div>
               </div>

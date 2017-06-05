@@ -1,9 +1,13 @@
       var nodes = null;
       var edges = null;
-      var graph = null;
+      var canvas = null;
+      var tree = { nodes: [{ label: 'nod0 0', id: 0 }], edges: [] };
+      var v = 0;
+      var graph = { nodes: [], edges: [] }; 
+      var edge_lut = {}, degrees = [], tmpEdges = [];
       var container = document.getElementById('mynetwork');
       var data;
-      var iteration;
+      var iteration = document.getElementById('user-seconds').value;
       var options = {
         "edges": {
           "smooth": {
@@ -18,10 +22,9 @@
           "minVelocity": 0.75
         }
       };
-    function draw(tipo) {
+    function models(tipo) {
 
       if (tipo == "arbol") {
-
          data = BalancedTree(document.getElementById('nodeCount').value, document.getElementById('alturaArbol').value);
       }
       else if (tipo == "barabasi") {
@@ -64,8 +67,9 @@
 
     function  generate() {
       iterationMode(document.getElementById('iteration').value);
-      draw(document.getElementById('grafo').value);      
-      graph = new vis.Network(container, data, options);
+
+      models(document.getElementById('grafo').value);      
+      canvas = new vis.Network(container, data, options);
 
     }
 
@@ -80,8 +84,7 @@
          * @param {Number} h altura del árbol
          */
     function BalancedTree (r, h) {
-        var v = 0,
-            graph = { nodes: [{ label: 'nod0 0', id: 0 }], edges: [] },
+        var       
             newLeaves = [],
             i, j, height, node, leaves;
 
@@ -90,9 +93,9 @@
             node = { id: (v),
                     label: 'nodo '+ v
                   };
-            graph.nodes.push(node);
+            tree.nodes.push(node);
             newLeaves.push(node);
-            graph.edges.push({ from: 0, to: v });
+            tree.edges.push({ from: 0, to: v });
         }
 
         for (height = 1; height < h; height++) {
@@ -105,12 +108,12 @@
                             label: 'nodo '+ v
                           };
                     newLeaves.push(node);
-                    graph.nodes.push(node);
-                    graph.edges.push({ from: leaves[j].id, to: v });
+                    tree.nodes.push(node);
+                    tree.edges.push({ from: leaves[j].id, to: v });
                 }
             }
         }
-        return {nodes:graph.nodes, edges:graph.edges};
+        return {nodes:tree.nodes, edges:tree.edges};
     }
 
 
@@ -122,13 +125,11 @@
      * @param {Number} M M  > 0 && M  <= m0
      */
     function BarabasiAlbert (N, m0, M) {
-        var graph = { nodes: [], edges: [] },
-            edge_lut = {},
-            degrees = [],
-            i, j, edge, sum, s, m, r, p;
-
+          var  i, j, edge, sum, s, m, r, p;
+           var num = parseInt(graph.nodes.length)+parseInt(m0);
+            var num2 = parseInt(graph.nodes.length)+parseInt(N);
         // creando m0 nodos
-        for (i = 0; i < m0; i++) {
+        for (i = graph.nodes.length; i < num; i++) {
             graph.nodes.push({ 
                     id: i,
                     label: 'nodo '+ i });
@@ -136,8 +137,8 @@
         }
 
         // Enlazando cada nodo con los demás
-        for (i = 0; i < m0; i++) {
-            for (j = i+1; j < m0; j++) {
+        for (i = 0; i < num; i++) {
+            for (j = i+1; j < num; j++) {
                 edge = { from: i, to: j };
                 edge_lut[edge.from+'-'+edge.to] = edge;
                 graph.edges.push(edge);
@@ -146,8 +147,8 @@
             }
         }
 
-        // Agregando N - mo nodos, cada uno con M aristas
-        for (i = m0; i < N; i++) {
+        // Agregando N - m0 nodos, cada uno con M aristas
+        for (i = num; i < num2; i++) {
             graph.nodes.push({ 
                     id: i,
                     label: 'nodo '+ i });
@@ -186,14 +187,14 @@
      * @param {Number} p probabilidad de una arista entre dos nodos
      */
     function erdosRenyiP (n, p) {
-        var graph = { nodes: [], edges: [] },
-            i, j;
-        for (i = 0; i < n; i++) {
+           var i,j;
+           var num = parseInt(graph.nodes.length)+parseInt(n);
+        for ( i = graph.nodes.length; i < num; i++) {
             graph.nodes.push({
                     id: i,
                     label: 'node ' + i 
                   });
-            for (j = 0; j < i; j++) {
+            for ( j = 0; j < i; j++) {
                 if (Math.random() < p) {
                     graph.edges.push({
                         from: i,
@@ -212,10 +213,9 @@
      * @param {Number} M número de aristas
      */
     function erdosRenyiM (n, M) {
-        var graph = { nodes: [], edges: [] },
-            tmpEdges = [],
-            i, j, k;
-        for (i = 0; i < n; i++) {
+        var i, j, k;
+            var num = parseInt(graph.nodes.length)+parseInt(n);
+        for (i = graph.nodes.length; i < num; i++) {
             graph.nodes.push({ 
                     id: i,
                     label: 'node '+ i });
@@ -244,16 +244,16 @@
      * @param {Number} alpha probabilidad de enlazamiento [0..1]
      */
     function wattsStrogatzA (n, k, alpha) {
-        var graph = { nodes: [], edges: [] },
-            i, j, edge,
+        var num = parseInt(graph.nodes.length)+parseInt(n);
+        var i, j, edge,
             p = Math.pow(10, -10),
             ec = 0,
             edge_lut = {},
             ids = [],
-            nk_half = n * k / 2,
+            nk_half = num * k / 2,
             Rij, sumRij, r, pij;
-
-        for (i = 0; i < n; i++) {
+        
+        for (i = graph.nodes.length; i < num; i++) {
             graph.nodes.push({ 
               id: i,
               label: 'node '+i });
@@ -323,11 +323,11 @@
      * @param {Number} beta probabilidad de enlazamiento [0..1]
      */
     function wattsStrogatzB (n, K, beta) {
-        var graph = { nodes: [], edges: [] },
-            i, j, t, edge,
+        var num = parseInt(graph.nodes.length)+parseInt(n);
+        var i, j, t, edge,
             edge_lut = {};
         K = K>>1;
-        for (i = 0; i < n; i++) {
+        for (i = graph.nodes.length; i < num; i++) {
             graph.nodes.push({ 
               id: i,
               label: 'node '+i });
@@ -340,13 +340,13 @@
         }
 
         // enlazamiento de aristas
-        for (i = 0; i < n; i++) {
+        for (i = graph.nodes.length; i < num; i++) {
             for (j = 1; j <= K; j++) { 
                 if (Math.random() <= beta) {
                     do {
                         t = Math.floor(Math.random() * (n-1));
                     } while (t == i || edge_lut[i+'-'+t]);
-                    var j_ = (i+j)%n;
+                    var j_ = (i+j)%num;
                     edge_lut[i+'-'+j_].to = t; // rewire
                     edge_lut[i+'-'+t] = edge_lut[i+'-'+j_];
                     delete edge_lut[i+'-'+j_];
@@ -360,7 +360,7 @@
 
       $(document).ready(function () {
       $('.params').hide();
-      $('#arbolBalanceado').show();
+      $('#arbol').show();
       $('#grafo').change(function () {
         $('.params').hide();
         $('#'+$(this).val()).show();
@@ -405,8 +405,9 @@ function reset () {
   document.getElementById("start").disabled = false;
   document.getElementById("stop").disabled = true;
   document.getElementById("reset").disabled = true;
-  network.destroy();
-  graph.splice(0, graph.length);
+  canvas.destroy();
+  tree = { nodes: [{ label: 'nod0 0', id: 0 }], edges: [] };
+  graph = { nodes: [], edges: [] };
 }
 
 function timer () {
@@ -422,7 +423,6 @@ function timer () {
     seconds ++;
     if(seconds % iteration == 0 ){
       generate();
-      console.log(iteration);
     }
     if (seconds < 10) { seconds = "0" + seconds }
     Seconds.innerHTML = ":" + seconds;
