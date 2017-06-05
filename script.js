@@ -8,6 +8,7 @@
       var container = document.getElementById('mynetwork');
       var data;
       var iteration = document.getElementById('user-seconds').value;
+      var aux=0;
       var options = {
         "edges": {
           "smooth": {
@@ -67,10 +68,9 @@
 
     function  generate() {
       iterationMode(document.getElementById('iteration').value);
-
       models(document.getElementById('grafo').value);      
       canvas = new vis.Network(container, data, options);
-
+      aux=0;
     }
 
     function updateRange() {
@@ -219,7 +219,7 @@
             graph.nodes.push({ 
                     id: i,
                     label: 'node '+ i });
-            for (j = i+1; j < n; j++) {
+            for (j = i+1; j < num; j++) {
                 tmpEdges.push({ from: i,
                                 to: j 
                 });
@@ -408,6 +408,7 @@ function reset () {
   canvas.destroy();
   tree = { nodes: [{ label: 'nod0 0', id: 0 }], edges: [] };
   graph = { nodes: [], edges: [] };
+  edge_lut = {}, degrees = [], tmpEdges = [];
 }
 
 function timer () {
@@ -421,9 +422,11 @@ function timer () {
   }
   if (centiseconds == 0) {
     seconds ++;
-    if(seconds % iteration == 0 ){
-      generate();
-    }
+    if(aux < iteration ){
+      aux++;
+      if(aux == iteration){
+         generate();
+    }}
     if (seconds < 10) { seconds = "0" + seconds }
     Seconds.innerHTML = ":" + seconds;
   }
