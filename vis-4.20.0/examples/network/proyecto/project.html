@@ -6,9 +6,11 @@
   <title>Grafos Aleatorios Dinámicos</title>
 
   <style type="text/css">
+
     body {
-      font: 12pt sans;
+        font: 12pt sans;
     }
+
     #mynetwork {
       float:left;
       width: 600px;
@@ -16,11 +18,40 @@
       margin:5px;
       border: 2px solid lightgray;
     }
+
+    #controles {
+        top: 0;
+        left: 0;
+        padding: 10px;
+        background: hsla(0,0%,100%,0.7);
+    }
+
+    #controles b { 
+      font-size: 13px; padding-right: 20px
+    }
+
+    #params, #graph {
+      display: inline-block; margin-left: 20px;
+    }
+
+    input { 
+      width: 6ex; margin-left: 1ex; text-align:right; 
+    }
+
+    label { 
+      margin-right: 2ex; font-family: Georgia; font-style:italic; 
+    }
+
+    input[type=range] { 
+      width: 80px; position:relative; top:4px
+    }
+
   </style>
 
 
   <script type="text/javascript" src="../exampleUtil.js"></script>
   <script type="text/javascript" src="../../../dist/vis.js"></script>
+  <script type="text/javascript" src="./jquery-1.10.1.js"></script>
   <link href="../../../dist/vis-network.min.css" rel="stylesheet" type="text/css" />
 
   <script type="text/javascript">
@@ -28,15 +59,41 @@
     var edges = null;
     var graph = null;
 
-    function draw(nodeCount) {
+    function draw(tipo) {
 
-      document.getElementById('nodeCount').addEventListener('change',updateRange,false);
+      if (tipo == "arbol") {
+        document.getElementById('nodeCount').addEventListener('change',updateRange,false);
+
+        var data = BalancedTree(document.getElementById('nodeCount').value, document.getElementById('alturaArbol').value);
+      }
+      else if (tipo == "barabasi") {
+        document.getElementById('nodeCount').addEventListener('change',updateRange,false);
+
+        var data = BarabasiAlbert(document.getElementById('nodeCount').value, document.getElementById('m0').value, document.getElementById('M').value); 
+      }
+      else if (tipo == "erdosRenyiP") {
+        document.getElementById('nodeCount').addEventListener('change',updateRange,false);
+
+        var data = erdosRenyiP(document.getElementById('nodeCount').value, document.getElementById('ERP').value); 
+      }
+      else if (tipo == "erdosRenyiM") {
+        document.getElementById('nodeCount').addEventListener('change',updateRange,false);
+
+        var data = erdosRenyiM(document.getElementById('nodeCount').value, document.getElementById('ERE').value); 
+      }
+      else if (tipo == "wattsStrogatzA") {
+        document.getElementById('nodeCount').addEventListener('change',updateRange,false);
+
+        var data = wattsStrogatzA(document.getElementById('nodeCount').value, document.getElementById('wattsStrogatzAlphaK').value, document.getElementById('wattsStrogatzAlpha').value); 
+      }
+      else if (tipo == "wattsStrogatzB") {
+        document.getElementById('nodeCount').addEventListener('change',updateRange,false);
+
+        var data = wattsStrogatzB(document.getElementById('nodeCount').value, document.getElementById('wattsStrogatzBetaK').value, document.getElementById('wattsStrogatzBeta').value); 
+      }
 
       nodes = [];
       edges = [];
-
-      // generador
-      var data = generateGraph(nodeCount);
 
       // create a network
       var container = document.getElementById('mynetwork');
@@ -44,7 +101,7 @@
       var options = {
         "edges": {
           "smooth": {
-            "type": "curvedCCW",
+            // "type": "curvedCCW",
             "forceDirection": "none"
           }
         },
@@ -58,33 +115,287 @@
       graph = new vis.Network(container, data, options);
     }
 
-    function generateGraph(nodeCount) {
-      var nodes = [];
-      var edges = [];
-      
-      // randomly create some nodes
-      for (var i = 0; i < nodeCount; i++) {
-        nodes.push({
-          id: i,
-          label: String(i)
-        });
-      }
+    /**
+         * Árbol Balanceado
+         *
+         * @param {Number} r número de hijos que tendrá cada nodo
+         * @param {Number} h altura del árbol
+         */
+    function BalancedTree (r, h) {
+        var v = 0,
+            graph = { nodes: [{ label: 'nod0 0', id: 0 }], edges: [] },
+            newLeaves = [],
+            i, j, height, node, leaves;
 
-      // randomly create some edges
-      for (var i = 0; i < nodeCount; i++) {
-        for (var j = 0; j < nodeCount; j++) {
-          if (i != j) {
-            if (getZeroOne() == 1) {
-              edges.push({
-                from: i,
-                to: j
-              });
-            }
-          }
+        for (i = 0; i < r; i++) {
+            v += 1;
+            node = { id: (v),
+                    label: 'nodo '+ v
+                  };
+            graph.nodes.push(node);
+            newLeaves.push(node);
+            graph.edges.push({ from: 0, to: v });
         }
+
+        for (height = 1; height < h; height++) {
+            leaves = newLeaves;
+            newLeaves = [];
+            for (j = 0; j < leaves.length; j++) {
+                for (i = 0; i < r; i++) {
+                    v += 1;
+                    node = { id: (v),
+                            label: 'nodo '+ v
+                          };
+                    newLeaves.push(node);
+                    graph.nodes.push(node);
+                    graph.edges.push({ from: leaves[j].id, to: v });
+                }
+            }
+        }
+        return {nodes:graph.nodes, edges:graph.edges};
+    }
+
+
+    /**
+     * Barabási–Albert
+     *
+     * @param {Number} N número total de nodos N > 0
+     * @param {Number} m0 m0 > 0 && m0 <  N
+     * @param {Number} M M  > 0 && M  <= m0
+     */
+    function BarabasiAlbert (N, m0, M) {
+        var graph = { nodes: [], edges: [] },
+            edge_lut = {},
+            degrees = [],
+            i, j, edge, sum, s, m, r, p;
+
+        // creando m0 nodos
+        for (i = 0; i < m0; i++) {
+            graph.nodes.push({ 
+                    id: i,
+                    label: 'nodo '+ i });
+            degrees[i] = 0;
+        }
+
+        // Enlazando cada nodo con los demás
+        for (i = 0; i < m0; i++) {
+            for (j = i+1; j < m0; j++) {
+                edge = { from: i, to: j };
+                edge_lut[edge.from+'-'+edge.to] = edge;
+                graph.edges.push(edge);
+                degrees[i]++;
+                degrees[j]++;
+            }
+        }
+
+        // Agregando N - mo nodos, cada uno con M aristas
+        for (i = m0; i < N; i++) {
+            graph.nodes.push({ 
+                    id: i,
+                    label: 'nodo '+ i });
+            degrees[i] = 0;
+            sum = 0;  // suma de los grados de todos los nodos
+            for (j = 0; j < i; j++) sum += degrees[j];
+            s = 0;
+            for (m = 0; m < M; m++) {
+                r = Math.random();
+                p = 0;
+                for (j = 0; j < i; j++) {
+                    if (edge_lut[i+'-'+j] || edge_lut[j+'-'+i]) continue;
+                    if (i == 1) p = 1;
+                    else p += degrees[j] / sum + s / (i - m);
+
+                    if (r <= p) {
+                        s += degrees[j] / sum;
+                        edge = { from: i, to: j };
+                        edge_lut[edge.from+'-'+edge.to] = edge;
+                        graph.edges.push(edge);
+                        degrees[i]++;
+                        degrees[j]++;
+                        break;
+                    }
+                }
+            }
+        }
+        return {nodes:graph.nodes, edges:graph.edges};
+    }
+
+
+    /**
+     * Erdős–Rényi P
+     *
+     * @param {Number} n número de nodos
+     * @param {Number} p probabilidad de una arista entre dos nodos
+     */
+    function erdosRenyiP (n, p) {
+        var graph = { nodes: [], edges: [] },
+            i, j;
+        for (i = 0; i < n; i++) {
+            graph.nodes.push({
+                    id: i,
+                    label: 'node ' + i 
+                  });
+            for (j = 0; j < i; j++) {
+                if (Math.random() < p) {
+                    graph.edges.push({
+                        from: i,
+                        to: j
+                    });
+                }
+            }
+        }
+        return {nodes:graph.nodes, edges:graph.edges};
+    }
+
+    /**
+     * Erdős–Rényi
+     *
+     * @param {Number} n número de nodos
+     * @param {Number} M número de aristas
+     */
+    function erdosRenyiM (n, M) {
+        var graph = { nodes: [], edges: [] },
+            tmpEdges = [],
+            i, j, k;
+        for (i = 0; i < n; i++) {
+            graph.nodes.push({ 
+                    id: i,
+                    label: 'node '+ i });
+            for (j = i+1; j < n; j++) {
+                tmpEdges.push({ from: i,
+                                to: j 
+                });
+            }
+        }
+
+        // Se seleccionan m aristas de forma aleatoria de tmpEdges
+        k = tmpEdges.length - 1;
+        for (i = 0; i < M; i++) {
+            graph.edges.push(tmpEdges.splice(Math.floor(Math.random()*k), 1)[0]);
+            k--;
+        }
+        return {nodes:graph.nodes, edges:graph.edges};
+    }
+
+
+    /**
+     * Watts-Strogatz Alpha
+     *
+     * @param {Number} n number of nodes
+     * @param {Number} K media del grado de los nodos (entero)
+     * @param {Number} alpha probabilidad de enlazamiento [0..1]
+     */
+    function wattsStrogatzA (n, k, alpha) {
+        var graph = { nodes: [], edges: [] },
+            i, j, edge,
+            p = Math.pow(10, -10),
+            ec = 0,
+            edge_lut = {},
+            ids = [],
+            nk_half = n * k / 2,
+            Rij, sumRij, r, pij;
+
+        for (i = 0; i < n; i++) {
+            graph.nodes.push({ 
+              id: i,
+              label: 'node '+i });
+
+            edge = { from: i, to: (i+1)%n };
+            edge_lut[edge.from+'-'+edge.to] = edge;
+            graph.edges.push(edge);
+            ec++;
+        }
+
+        // Creando n * k / 2 aristas
+        while (ec < nk_half) {
+            for (i = 0; i < n; i++) {
+                ids.push(i);
+            }
+            while (ec < nk_half && ids.length > 0) {
+                i = ids.splice(Math.floor(Math.random()*ids.length), 1)[0];
+                Rij = [];
+                sumRij = 0;
+                for (j = 0; j < n; j++) {
+                    Rij[j] = calculateRij(i, j);
+                    sumRij += Rij[j];
+                }
+                r = Math.random();
+                pij = 0;
+                for (j = 0; j < n; j++) {
+                    if (i != j) {
+                        pij += Rij[j] / sumRij;
+                        if (r <= pij) {
+                            edge = { from: i, to: j };
+                            graph.edges.push(edge);
+                            ec++;
+                            edge_lut[edge.from+'-'+edge.to] = edge;
+                        }
+                    }
+                }
+            }
+        }
+
+      return {nodes:graph.nodes, edges:graph.edges};
+
+      function calculateRij(i, j) {
+          if (i == j || edge_lut[i+'-'+j]) return 0;
+          var mij = calculatemij(i, j);
+          if (mij >= k) return 1;
+          if (mij === 0) return p;
+          return Math.pow(mij / k, alpha) * (1 - p) + p;
       }
 
-      return {nodes:nodes, edges:edges};
+      function calculatemij(i, j) {
+          var mij = 0, l;
+          for (l = 0; l < n; l++) {
+              if (l != i && l != j && edge_lut[i+'-'+l] && edge_lut[j+'-'+l]) {
+                  mij++;
+              }
+          }
+          return mij;
+      }
+    }
+    
+
+    /**
+     * Watts-Strogatz Small World model Beta
+     *
+     * @param {Number} n número de nodos
+     * @param {Number} K media del grado de los nodos (entero)
+     * @param {Number} beta probabilidad de enlazamiento [0..1]
+     */
+    function wattsStrogatzB (n, K, beta) {
+        var graph = { nodes: [], edges: [] },
+            i, j, t, edge,
+            edge_lut = {};
+        K = K>>1;
+        for (i = 0; i < n; i++) {
+            graph.nodes.push({ 
+              id: i,
+              label: 'node '+i });
+
+            for (j = 1; j <= K; j++) {
+                edge = { from: i, to: (i+j)%n };
+                edge_lut[edge.from+'-'+edge.to] = edge;
+                graph.edges.push(edge);
+            }
+        }
+
+        // enlazamiento de aristas
+        for (i = 0; i < n; i++) {
+            for (j = 1; j <= K; j++) { 
+                if (Math.random() <= beta) {
+                    do {
+                        t = Math.floor(Math.random() * (n-1));
+                    } while (t == i || edge_lut[i+'-'+t]);
+                    var j_ = (i+j)%n;
+                    edge_lut[i+'-'+j_].to = t; // rewire
+                    edge_lut[i+'-'+t] = edge_lut[i+'-'+j_];
+                    delete edge_lut[i+'-'+j_];
+                }
+            }
+        }
+        return {nodes:graph.nodes, edges:graph.edges};
     }
 
     function getZeroOne() {
@@ -92,23 +403,75 @@
     }
 
     function updateRange() {
-      document.getElementById('val').innerHTML=document.getElementById('nodeCount').value;
+      document.getElementById('nodeCount').innerHTML=document.getElementById('nodeCount').value;
     }
+  </script>
+
+  <script type="text/javascript">
+      $(document).ready(function () {
+      $('.params').hide();
+      $('#arbolBalanceado').show();
+      $('#grafo').change(function () {
+        $('.params').hide();
+        $('#'+$(this).val()).show();
+      })
+    });
   </script>
   
 </head>
 
-<body onload="draw(10);">
+<body onload="draw('arbol');">
 
 <h2>Grafos Aleatorios Dinámicos</h2>
-<br />
-<div>
-  Número de Nodos: 
-  <input type="range" min="2" max="100" step="2" value="10" name="height" id="nodeCount">
-  <span id="val">10</span>
-  <br>
-  <button onClick="draw(document.getElementById('nodeCount').value);">Generar</button>
+<div id="controles">
+    <label>Modelo</label><br>
+
+    <select id="grafo">
+        <option value="arbolBalanceado">Árbol Balanceado</option>
+        <option value="barabasi">Barabási-Albert</option>
+        <option value="erdosRenyiP">Erdös-Renyi (Probabilidad)</option>
+        <option value="erdosRenyiM">Erdös-Renyi (Aristas)</option>
+        <option value="wattsStrogatzA">Watts-Strogatz (Alpha)</option>   
+        <option value="wattsStrogatzB">Watts-Strogatz (Beta)</option>
+    </select>
+
+    <br><br>
+    <div style="width: 100%">
+        <div style="float: left;">
+            <label>Número de Nodos<input id="nodeCount" value="2" type="input"></label>
+        </div>
+        <div style="float: left;">
+          <div id="arbolBalanceado" class="params">
+              <label>Altura<input id="alturaArbol" value="2" type="input"></label>
+              <button style="font-size: 12px;font-weight: bold; padding: 4px 10px;" onClick="draw('arbol');">GENERAR</button>
+          </div>
+          <div id="barabasi" class="params">
+              <label>m0<input id="m0" type="input"></label>
+              <label>M<input id="M" type="input"></label>
+              <button style="font-size: 12px;font-weight: bold; padding: 4px 10px;" onClick="draw('barabasi');">Generar</button>
+          </div>
+          <div id="erdosRenyiP" class="params">
+              <label>Probabilidad<input id="ERP" type="input"></label>
+              <button style="font-size: 12px;font-weight: bold; padding: 4px 10px;" onClick="draw('erdosRenyiP');">Generar</button>
+          </div>
+          <div id="erdosRenyiM" class="params">
+              <label>Número de Vértices<input id="ERE" type="input"></label>
+              <button style="font-size: 12px;font-weight: bold; padding: 4px 10px;" onClick="draw('erdosRenyiM');">Generar</button>
+          </div>
+          <div id="wattsStrogatzA" class="params">
+              <label>K<input id="wattsStrogatzAlphaK" type="input"></label>
+              <label>alpha<input id="wattsStrogatzAlpha" type="input"></label>
+              <button style="font-size: 12px;font-weight: bold; padding: 4px 10px;" onClick="draw('wattsStrogatzA');">Generar</button>
+          </div>
+          <div id="wattsStrogatzB" class="params">
+              <label>K<input id="wattsStrogatzBetaK" type="input"></label>
+              <label>beta<input id="wattsStrogatzBeta" type="input"></label>
+              <button style="font-size: 12px;font-weight: bold; padding: 4px 10px;" onClick="draw('wattsStrogatzB');">Generar</button>
+          </div>
+        </div>
+    </div>
 </div>
-<div id="mynetwork"></div>
+<br>
+<div id="mynetwork" style="box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2), 0 6px 20px 0 rgba(0,0,0,0.19);"></div>
 </body>
 </html>
